@@ -6,8 +6,8 @@ window.wsmanager = {
   status: "",
 }
 
-//var apiBasePath = 'https://api.lekh.app/v1';
-var apiBasePath = 'http://localhost:3000/v1';
+var apiBasePath = 'https://api.lekh.app/v1';
+//var apiBasePath = 'http://localhost:3000/v1';
 
 const docUrl = 'wss://api.lekh.app/v1/connect/ds1/c267362c-84b1-48bb-9d48-fb05f97ec0fe';
 
@@ -29,19 +29,7 @@ function doInitialInit(columns) {
   Module.init(canvas);
   loadBasicTemplates(columns);
   attachEventHandlers();
-  //window.wsmanager.start();
   startDoc();
-  /*
-  
-  $.get("test.lekh", function (data) {
-    //console.log(data);
-    Module.loadDoc(data);
-    setTimeout(function () {
-      var ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      Module.drawCanvas(ctx);
-    }, 0);
-  });*/
 }
 
 function setCanvasSize() {
