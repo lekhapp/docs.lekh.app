@@ -2,6 +2,15 @@ var runtimeInitialized = false;
 var initialInitDone = false;
 var docReady = false;
 
+window.wsmanager = {
+  status: "",
+}
+
+//var apiBasePath = 'https://api.lekh.app/v1';
+var apiBasePath = 'http://localhost:3000/v1';
+
+const docUrl = 'wss://api.lekh.app/v1/connect/ds1/c267362c-84b1-48bb-9d48-fb05f97ec0fe';
+
 function doInitialInit(columns) {
   if (initialInitDone) {
     return;
@@ -20,6 +29,8 @@ function doInitialInit(columns) {
   Module.init(canvas);
   loadBasicTemplates(columns);
   attachEventHandlers();
+  //window.wsmanager.start();
+  startDoc();
   /*
   
   $.get("test.lekh", function (data) {
@@ -63,3 +74,70 @@ var Module = {
     doInitialInit(3);
   }
 };
+
+function startDoc() {
+  var url = new URL(window.location);
+  var docid = url.searchParams.get('docid');
+  if (docid) {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var obj = JSON.parse(xhttp.responseText);
+          wsmanager.start(docid, obj.location);
+        }
+      };
+      var url = apiBasePath + "/docs/" + docid;
+      xhttp.open("POST", url);
+      xhttp.send();
+  } else {
+    var np = url.searchParams.get('_new');
+    if (np == 'true') {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var obj = JSON.parse(xhttp.responseText);
+          var url = new URL(window.location);
+          var newUrl = url.origin + "/?docid=" + obj.docid;
+          window.location = newUrl;
+        }
+      };
+      var url = apiBasePath + "/docs"
+      xhttp.open("POST", url);
+      xhttp.send();
+    }
+  }
+}
+
+wsmanager.start = function (docid, location) {
+  var timer;
+
+  const ws = new window.WebSocket(location);
+  Module.startDoc(docid);
+
+  wsmanager.send = function(docid, data) {
+    ws.send(data);
+    return true;
+  }
+
+  ws.onopen = function(event) {
+      console.log('connection opened: ', event);
+      timer = window.setInterval(function() {
+          ws.send('{}');
+      }, 15000);
+  };
+
+  ws.onmessage = function(event) {
+      window.Module.updateDoc(event.data);
+      drawCanvas();
+  };
+
+  ws.onclose = function(event) {
+      console.log('connection closed:', event);
+      window.clearInterval(timer);
+  };
+
+  ws.onerror = function(event) {
+      console.log('connection error: ', event);
+      window.clearInterval(timer);
+  };
+}
