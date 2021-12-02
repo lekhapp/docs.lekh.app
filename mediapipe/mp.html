@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="/mediapipe/hands.js" crossorigin="anonymous"></script>
+  <style>
+        .input_video {
+            display: none;
+            /*transform: scale(-1, 1);*/
+        }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <video class="input_video" autoplay></video>
+    </div>
+  <script>
+      var resultsCb = null;
+      var deviceId = null;
+      var stream = null;
+      var currentTime = null;
+
+      const videoElement = document.getElementsByClassName('input_video')[0];
+
+      const hands = new Hands({locateFile: (file) => {
+        // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        return `/mediapipe/${file}`;
+      }});
+      hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      
+      hands.onResults((results) => {
+        if (resultsCb) {
+          resultsCb(results)
+        }
+      });
+
+      function capture(videoElement) {
+          window.requestAnimationFrame(async function () {
+            if (!(videoElement.paused || videoElement.currentTime === currentTime)) {
+              currentTime = videoElement.currentTime;
+              await hands.send({ image: videoElement });
+            }
+            capture(videoElement);
+          });
+      }
+
+      function startCamera(devId, cb) {
+        deviceId = devId;
+        resultsCb = cb;
+        if (stream) {
+          stream.getTracks().forEach(track => {
+            track.stop();
+          });
+          stream = null;
+        }
+        const constraints = {
+          video: {
+            deviceId: deviceId ? {exact: deviceId} : undefined,
+            width: 1280,
+            height: 720
+          }
+        };
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then((devStream) => {
+          stream = devStream;
+          videoElement.srcObject = stream;
+          videoElement.onloadedmetadata = function () {
+            videoElement.play();
+          };
+          capture(videoElement);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      }
+    </script>
+</body>
+</html>
+
+<!-- 
+
+  <script src="/mediapipe/camera_utils.js" crossorigin="anonymous"></script>
+
+  function startCamera(cid, cb) {
+        if (camera != null) {
+          return
+        }
+        deviceId = cid;
+        resultsCb = cb;
+
+        camera = new Camera(videoElement, {
+          onFrame: async () => {
+            await hands.send({ image: videoElement });
+          },
+          width: 1280,
+          height: 720
+        });
+        camera.start();
+      }
+
+      function stopCamera() {
+        camera.stop();
+        camera = null;
+        resultsCb = null;
+      }
+
+-->
