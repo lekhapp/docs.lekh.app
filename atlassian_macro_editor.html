@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Lekh Diagram Editor</title>
+        <script type="text/javascript" src="https://connect-cdn.atl-paas.net/all.js"></script>
+        <style>
+            .container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background-color: #00000022;
+            }
+            .box {
+                width: 60px;
+                margin: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <img src="logo192.png" class="box" />
+            <span>Loading..</span>
+        </div>
+        <script type="text/javascript">
+            AP.dialog.create({
+                key: 'macro-editor',
+                chrome: false,
+                closeOnEscape: false,
+                width: "100%",
+                height: "100%",
+            });
+            AP.events.on('dialog.close', function(flags)
+            {
+                AP.confluence.closeMacroEditor();
+            });
+        </script>
+    </body>
+</html>
