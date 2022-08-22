@@ -1,0 +1,21 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <script>
+            var conf = {
+                baseUrl: "https://api.lekh.app",
+                appUrl: "https://docs.lekh.app",
+            }
+            function handleStorageChange() {
+                var token = localStorage.getItem('LKH-RFR');
+                window.parent.postMessage(token, conf.baseUrl);
+            }
+
+            window.addEventListener('storage', handleStorageChange);
+            setTimeout(function() {
+                handleStorageChange();
+            }, 100);
+        </script>
+    </body>
+</html>
