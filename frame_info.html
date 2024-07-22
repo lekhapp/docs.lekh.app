@@ -11,7 +11,7 @@
                 if (ref && ref.startsWith('http://localhost:')) {
                   target = ref;
                 }
-                let token = localStorage.getItem('LKH-RFR');
+                let token = localStorage.getItem('setting_refresh_token');
                 window.parent.postMessage(token, target);
             }
 
